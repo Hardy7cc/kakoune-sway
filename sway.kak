@@ -86,11 +86,11 @@ Switches:
           text="$*"
         fi
 
-        CUR_ID=$(swaymsg -t get_tree | jq -r "recurse(.nodes[]?) | select(.focused == true).id")
+        cur_id=$(swaymsg -t get_tree | jq -r "recurse(.nodes[]?) | select(.focused == true).id")
         swaymsg "[title=kak_repl_window] focus" &&
-        echo -n "$text" | wl-copy --paste-once --primary &&
+        echo -n "$text" | wl-copy --type text/plain --paste-once --primary &&
         ydotool key $paste_keystroke >/dev/null 2>&1 &&
-        swaymsg "[con_id=$CUR_ID] focus"
+        swaymsg "[con_id=$cur_id] focus"
       }
     }
     alias global send-text sway-send-text
