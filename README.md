@@ -44,9 +44,9 @@ A `sway` user-mode is also declared. With the mapping in the Install section abo
 
 ### `send-text`
 
-If the module [`x11-repl`](https://github.com/mawww/kakoune/blob/master/rc/windowing/repl/x11.kak) is loaded, a `sway-send-text` command is defined to provide the functionality of `x11-send-text`, and the alias `send-text` is set to `sway-send-text`. This requires the packages `jq`, `wl-clipboard`, and `ydotool`.
+If the module [`x11-repl`](https://github.com/mawww/kakoune/blob/master/rc/windowing/repl/x11.kak) is loaded, a `sway-send-text` command is defined to provide the functionality of `x11-send-text`, and the alias `send-text` is set to `sway-send-text`. This requires the packages `jq`, `wl-clipboard`, and `wtype`.
 
-The method for sending text mirrors that of `x11-repl`, which means copying to the primary clipboard and pasting (`wl-clipboard`) with emulated `shift+insert` (`ydotool`). `jq` is used for parsing Sway data. Any suggestions for improving this are welcome.
+The method for sending text mirrors that of `x11-repl`, which means copying to the primary clipboard and pasting (`wl-clipboard`) with emulated `shift+insert` (`wtype`). `jq` is used for parsing Sway data. Any suggestions for improving this are welcome.
 
 Note: just like `x11-repl`, this finds the correct window by the window name. Some applications, like `fish` will rename the window by default, and thus break this. Therefore, run the repl with `:repl <repl-executable>` to avoid this.
 
