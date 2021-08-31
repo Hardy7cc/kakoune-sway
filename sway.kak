@@ -2,6 +2,16 @@
 # ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 # see also: tmux.kak
 
+hook global ModuleLoaded wayland %{
+  try %{
+    eval %sh{ [ -z "$SWAYSOCK" ] && echo fail " " }
+    require-module sway
+  }
+}
+
+
+provide-module sway %{
+
 ## Temporarily override the default client creation command
 define-command -hidden -params 1.. sway-new-impl %{
   evaluate-commands %sh{
@@ -57,44 +67,4 @@ map global sway j :sway-new-down<ret> -docstring '↓ new window below'
 
 #map global user 3 ': enter-user-mode sway<ret>' -docstring 'sway…'
 
-# Sway support for send-text using wtype
-
-try %{ eval %sh{ [ -z "$SWAYSOCK" ] && echo fail " " }
-  hook -once global ModuleLoaded x11-repl %sh{
-    if ! { command -v wtype && command -v jq && command -v wl-copy && command -v wl-paste; } >/dev/null
-    then echo define-command sway-send-text %{ fail "wtype, jq, or wl-clipboard missing" }
-    else
-    cat << 'EOF'
-    define-command -params .. \
-    -docstring %{sway-send-text [text]: Send text to the REPL window.
-    [text]: text to send instead of selection.
-Switches:
-	-send-enter Send an <enter> keystroke after the text.} \
-    sway-send-text %{
-      nop %sh{
-        paste_keystroke="-M shift -k insert -m shift"
-
-  	    if [ $# -ge 1 ]; then
-  	    	case "$1" in
-  	    		-send-enter) shift; paste_keystroke="$paste_keystroke -k return";
-      		esac
-      	fi
-      	
-        if [ $# -eq 0 ]; then
-          text="$kak_selection"
-        else
-          text="$*"
-        fi
-
-        cur_id=$(swaymsg -t get_tree | jq -r "recurse(.nodes[]?) | select(.focused == true).id")
-        swaymsg "[title=kak_repl_window] focus" &&
-        echo -n "$text" | wl-copy --type text/plain --paste-once --primary &&
-        wtype $paste_keystroke -s 100 >/dev/null 2>&1 &&
-        swaymsg "[con_id=$cur_id] focus"
-      }
-    }
-    alias global send-text sway-send-text
-EOF
-    fi
-  }
 }
