@@ -14,13 +14,18 @@ define-command -docstring %{
 } \
   -params .. \
   -shell-completion \
-  sway-repl %{ wayland-terminal sh -c %{
-    winid=$(swaymsg -t get_tree | jq '.. | select(.type?) | select(.focused==true) | .id')
-    printf "evaluate-commands -try-client $1 \
-      'set-option current sway_repl_id ${winid}'" | kak -p "$2"
-    shift 2;
-    [ "$1" ] && "$@" || "$SHELL"
-  } -- %val{client} %val{session} %arg{@}
+  sway-repl %{
+  nop %sh{
+    nohup sh <<EOF >/dev/null 2>&1 &
+      timeout 5 swaymsg -t subscribe -m '[ "window" ]' \
+      | jq --unbuffered 'if (.change == "new") then .container.id else empty end' \
+      | head -n 1 \
+      | xargs -I '@winid' -- sh -c "printf \"evaluate-commands -try-client $kak_client \
+        'set-option current sway_repl_id @winid'\" | kak -p \"$kak_session\""
+    EOF
+    disown
+  }
+  wayland-terminal sh -c %{ [ "$1" ] && "$@" || "$SHELL" } -- %arg{@}
 }
 
 define-command -params .. \
